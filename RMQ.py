@@ -15,7 +15,7 @@ class RMQConnection(threading.Thread):
         self.URLparameters = pika.connection.URLParameters("amqp://sensors:sensors@localhost:5672")
         self.connection = pika.BlockingConnection(self.URLparameters)
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue="sensorData", durable=True, exclusive=False, auto_delete=True)
+        self.channel.queue_declare(queue="sensorData", durable=True, exclusive=False, auto_delete=False)
         self.channel.basic_consume(self.callback, queue='sensorData')
         print('start consuming')
         self.channel.start_consuming()
