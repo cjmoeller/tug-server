@@ -2,7 +2,7 @@ import time, threading, pika
 
 class RMQConnection(threading.Thread):
     def callback(self, ch, method, properties, body):
-        print(' [x] received %r' % (body,))
+        # print(' [x] received %r' % (body,))
         self.queue.put(body)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
