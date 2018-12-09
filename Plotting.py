@@ -9,15 +9,18 @@ import math
 class Plot(QtGui.QMainWindow):
 
 
-    def __init__(self, queueList, parent=None):
+    def __init__(self, queueList, plottingQueues, parent=None):
         super(Plot, self).__init__(parent)
 
         #### Useable Vars
         self.accX, self.accY, self.accZ = queueList[0:3]
         self.rotX, self.rotY, self.rotZ = queueList[3:6]
         self.accXY, self.rotXY, self.steps, self.integRotZ = queueList[6:10]
+        self.accTime, self.rotTime, self.stepsTime = queueList[10:13]
 
 
+        #### PlottingQueues
+        self.fftQueue, self.ifftQueue = plottingQueues[0:2]
 
         #### Create Gui Elements ###########
         self.resize(1200, 900)
@@ -53,6 +56,9 @@ class Plot(QtGui.QMainWindow):
         self.otherplot6 = self.canvas.addPlot(title="Steps")
         self.h6 = self.otherplot6.plot(pen='y')
 
+        self.otherplot7 = self.canvas.addPlot(title="FFT")
+        self.h7 = self.otherplot7.plot(pen='y')
+
 
         ### Set Ranges #####################
 
@@ -61,6 +67,7 @@ class Plot(QtGui.QMainWindow):
         self.otherplot4.setYRange(-20, 20, padding=0)
 
 
+        self.otherplot7.setYRange(-5,110)
 
 
 
@@ -81,6 +88,7 @@ class Plot(QtGui.QMainWindow):
         self.h4.setData(self.rotXY)
         self.h5.setData(self.integRotZ)
         self.h6.setData(self.steps)
+        # self.h7.setData(self.fftQueue)
 
         now = time.time()
         dt = (now-self.lastupdate)
