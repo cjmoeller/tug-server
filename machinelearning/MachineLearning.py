@@ -21,25 +21,32 @@ class ML(threading.Thread):
 
         self.workingQueue = deque(maxlen=FRAMESIZE)
         self.workingTime = deque(maxlen=FRAMESIZE)
+
+
+    def run(self):
         counter = 0
 
         print("Lol")
 
-        # for body in iter(self.accXY.get, None):
-        #     self.workingQueue.append(body)
-        #     counter += 1
-        #     if counter == FRAMESIZE/2:
-        #         timestep = (self.accTime[-1] - self.accTime[0]) / float(len(self.accTime))
-        #         self.FFT(self.workingQueue, timestep)
-        #         counter = 0
+        for body in iter(self.accXY.get, None):
+            print("sheesh")
+            self.workingQueue.append(body)
+            counter += 1
+            if counter == self.FRAMESIZE/10:
+                timestep = (self.workingQueue[-1][0] - self.workingQueue[0][0] / float(len(self.workingQueue)))
+                self.FFT(self.workingQueue, timestep)
+                counter = 0
+
+
 
     def FFT(self, values: deque, timestep):
-        fourier = np.fft.fft(values)
+        fourier = np.fft.rfft([y for (x,y) in self.workingQueue])
+        fourier = np.abs(fourier)
         N = len(values)
         samplerate = 1/timestep
         freqs = np.fft.fftfreq(N)*samplerate
 
         # self.fftQueue.clear()
         for time, value in zip(freqs, fourier):
-            self.fftQueue.append(value)
+            self.fftQueue.append((time, value))
 

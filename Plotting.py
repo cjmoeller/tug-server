@@ -82,13 +82,27 @@ class Plot(QtGui.QMainWindow):
 
     def _update(self):
 
-        self.h1.setData(self.accXY)
-        self.h3.setData(self.accZ)
+        if self.accXY:
+            accXYtime, accXY = map(list, zip(*self.accXY))
+            self.h1.setData(accXYtime, accXY)
 
-        self.h4.setData(self.rotXY)
-        self.h5.setData(self.integRotZ)
-        self.h6.setData(self.steps)
-        # self.h7.setData(self.fftQueue)
+            accZtime, accZ = map(list, zip(*self.accZ))
+            self.h3.setData(accZtime, accZ)
+
+        if self.rotXY:
+            rotXYTime, rotXY = map(list, zip(*self.rotXY))
+            self.h4.setData(rotXYTime, rotXY)
+
+            rotZTime, rotZ= map(list, zip(*self.accXY))
+            self.h5.setData(rotZTime, rotZ)
+
+        if self.steps:
+            stepsTime, steps = map(list, zip(*self.steps))
+            self.h6.setData(stepsTime, steps)
+
+        if self.fftQueue:
+            freqs, mag = map(list, zip(*self.fftQueue))
+            self.h7.setData(freqs, mag)
 
         now = time.time()
         dt = (now-self.lastupdate)

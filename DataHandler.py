@@ -49,7 +49,7 @@ class DataHandler(threading.Thread):
         self.calcrotZsmall = deque(maxlen=self.SMALLERFRAME)
 
         for body in iter(self.queue.get, None):
-            print(' [x] received %r' % (body,))
+            # print(' [x] received %r' % (body,))
             self.unwrap(body)
             self.tuneValues()
             self.clearTemp()
@@ -98,78 +98,82 @@ class DataHandler(threading.Thread):
 
 
     def fillQueue(self, queue):
-        for accx, accy in zip(self.tempaccX, self.tempaccY):
-            queue[0].put(accx)
-            queue[1].put(accy)
-            queue[6].put(math.sqrt(accx * accx + accy * accy))
+        for accx, accy, accz, acctime in zip(self.tempaccX, self.tempaccY, self.tempaccZ, self.tempaccTime):
+            queue[0].put((acctime,accx))
+            queue[1].put((acctime,accy))
+            queue[2].put((acctime,accz))
 
-        for accz in self.tempaccZ:
-            queue[2].put(accz)
+            queue[6].put((acctime,math.sqrt(accx * accx + accy * accy)))
 
-
-        for time in self.tempaccTime:
-            queue[10].put(time)
+        # for accz in self.tempaccZ:
+        #     queue[2].put(accz)
 
 
-        for rotx, roty in zip(self.temprotX, self.temprotY):
-            queue[3].put(rotx)
-            queue[4].put(roty)
-            queue[7].put(math.sqrt(rotx * rotx + roty * roty))
+        # for time in self.tempaccTime:
+        #     queue[10].put(time)
 
-        tempZ = not len(self.temprotZ) == 0
-        for rotz in self.temprotZ:
-            queue[5].put(rotz)
 
-        for time in self.temprotTime:
-            queue[11].put(time)
+        for rotx, roty, rotz, rottime in zip(self.temprotX, self.temprotY, self.temprotZ, self.temprotTime):
+            queue[3].put((rottime, rotx))
+            queue[4].put((rottime, roty))
+            queue[5].put((rottime, rotz))
+            queue[7].put((rottime, math.sqrt(rotx * rotx + roty * roty)))
+
+        # for rotz in self.temprotZ:
+        #     queue[5].put(rotz)
+
+        # for time in self.temprotTime:
+        #     queue[11].put(time)
 
         # If new Values, calc a new Integral
+        tempZ = not len(self.temprotZ) == 0
         if tempZ:
             queue[9].put(np.trapz(self.calcrotZsmall))
 
-        for step in self.tempSteps:
-            queue[8].put(step)
+        for step,time in zip(self.tempSteps, self.tempStepsTime):
+            queue[8].put((time,step))
 
-        for time in self.tempStepsTime:
-            queue[12].put(time)
+        # for time in self.tempStepsTime:
+        #     queue[12].put(time)
 
     def fillDeque(self, queue):
-        for accx, accy in zip(self.tempaccX, self.tempaccY):
-            queue[0].append(accx)
-            queue[1].append(accy)
-            queue[6].append(math.sqrt(accx * accx + accy * accy))
+        for accx, accy, accz, acctime in zip(self.tempaccX, self.tempaccY, self.tempaccZ, self.tempaccTime):
+            queue[0].append((acctime,accx))
+            queue[1].append((acctime,accy))
+            queue[2].append((acctime,accz))
 
-        for accz in self.tempaccZ:
-            queue[2].append(accz)
+            queue[6].append((acctime,math.sqrt(accx * accx + accy * accy)))
 
-
-        for time in self.tempaccTime:
-            queue[10].append(time)
+        # for accz in self.tempaccZ:
+        #     queue[2].put(accz)
 
 
-        for rotx, roty in zip(self.temprotX, self.temprotY):
-            queue[3].append(rotx)
-            queue[4].append(roty)
-            queue[7].append(math.sqrt(rotx * rotx + roty * roty))
+        # for time in self.tempaccTime:
+        #     queue[10].put(time)
 
-        tempZ = not len(self.temprotZ) == 0
-        for rotz in self.temprotZ:
-            queue[5].append(rotz)
 
-        for time in self.temprotTime:
-            queue[11].append(time)
+        for rotx, roty, rotz, rottime in zip(self.temprotX, self.temprotY, self.temprotZ, self.temprotTime):
+            queue[3].append((rottime, rotx))
+            queue[4].append((rottime, roty))
+            queue[5].append((rottime, rotz))
+            queue[7].append((rottime, math.sqrt(rotx * rotx + roty * roty)))
+
+        # for rotz in self.temprotZ:
+        #     queue[5].put(rotz)
+
+        # for time in self.temprotTime:
+        #     queue[11].put(time)
 
         # If new Values, calc a new Integral
+        tempZ = not len(self.temprotZ) == 0
         if tempZ:
             queue[9].append(np.trapz(self.calcrotZsmall))
 
-        for step in self.tempSteps:
-            queue[8].append(step)
+        for step,time in zip(self.tempSteps, self.tempStepsTime):
+            queue[8].append((time,step))
 
-        for time in self.tempStepsTime:
-            queue[12].append(time)
-
-
+        # for time in self.tempStepsTime:
+        #     queue[12].put(time)
 
     def clearTemp(self):
         self.temprotX.clear()
