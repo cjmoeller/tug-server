@@ -9,11 +9,13 @@ class DataHandler(threading.Thread):
 
     SMALLERFRAME = 100
 
-    def __init__(self, queue, plottingDataQueue, machineLearningDataQeue):
+    def __init__(self, queue, plottingDataQueue, machineLearningDataQeue, args, text_file):
         threading.Thread.__init__(self)
         self.queue = queue
         self.plottingDataQueue = plottingDataQueue
         self.machineLearningDataQueue = machineLearningDataQeue
+        self.args = args
+        self.text_file = text_file
 
         # #### Useable Vars
         # self.accPlotX, self.accPlotY, self.accPlotZ = plottingDataQueue[0:3]
@@ -72,21 +74,27 @@ class DataHandler(threading.Thread):
         if measurement_type == 4:
             time = struct.unpack('>q', body[1:9])[0]
 
-            v4 = struct.unpack('>f', body[9:13])[0]
-            v5 = struct.unpack('>f', body[13:17])[0]
-            v6 = struct.unpack('>f', body[17:21])[0]
+            v1 = struct.unpack('>f', body[9:13])[0]
+            v2 = struct.unpack('>f', body[13:17])[0]
+            v3 = struct.unpack('>f', body[17:21])[0]
 
-            self.temprotX.append(float(v4))
-            self.temprotY.append(float(v5))
-            self.temprotZ.append(float(v6))
+            self.temprotX.append(float(v1))
+            self.temprotY.append(float(v2))
+            self.temprotZ.append(float(v3))
             self.temprotTime.append(time)
 
         if measurement_type == 5:
             time = struct.unpack('>q', body[1:9])[0]
-            steps = struct.unpack('>f', body[9:13])[0]
 
-            self.tempSteps.append(float(steps))
+            v1 = struct.unpack('>f', body[9:13])[0]
+            v2 = 0
+            v3 = 0
+
+            self.tempSteps.append(float(v1))
             self.tempStepsTime.append(time)
+
+        if self.args.save:
+            self.save_to_file(time, measurement_type, v1, v2, v3)
 
 
     def tuneValues(self):
@@ -188,3 +196,6 @@ class DataHandler(threading.Thread):
 
         self.tempSteps.clear()
         self.tempStepsTime.clear()
+
+    def save_to_file(self, mes_time, mes_type, v1, v2, v3):
+        self.text_file.write('{};{};{};{};{}\n'.format(mes_time, mes_type, v1, v2, v3))

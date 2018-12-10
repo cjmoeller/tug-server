@@ -7,6 +7,14 @@ from Plotting import Plot
 from collections import deque
 from DataHandler import DataHandler
 from machinelearning.MachineLearning import ML
+import argparse
+import datetime
+
+parser = argparse.ArgumentParser(description='Live Abschnittserkennung des TUG-Tests mit Hilfe von IMU-Daten und Neuronalen Netzen')
+parser.add_argument('--save', dest='save', action='store_true', help='Save received values to file', default=False)
+args = parser.parse_args()
+
+text_file = None
 
 def createDequeList():
     queueList = []
@@ -88,6 +96,11 @@ def createQueueList():
 
 if __name__ == '__main__':
 
+    if args.save:
+        file_name = '{0:%Y-%m-%d_%H-%M-%S}'.format(datetime.datetime.now())
+        text_file = open('{}.csv'.format(file_name), "w+")
+        text_file.write("time;Sensor Type;v1;v2;v3\n")
+
     app = QtGui.QApplication(sys.argv)
 
     FRAMESIZE = 500
@@ -110,7 +123,7 @@ if __name__ == '__main__':
     thisplot = Plot(plottingDataQueue, machineLearningPlottingQueues)
     thisplot.show()
 
-    dataHandler = DataHandler(rmqQueue, plottingDataQueue, machineLearningDataQueue)
+    dataHandler = DataHandler(rmqQueue, plottingDataQueue, machineLearningDataQueue, args, text_file)
     dataHandler.start()
 
 
