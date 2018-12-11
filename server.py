@@ -113,8 +113,8 @@ if __name__ == '__main__':
 
     machineLearningPlottingQueues = []
 
-    fftQueue = deque(maxlen=FRAMESIZE)
-    ifftQueue = deque(maxlen=FRAMESIZE)
+    fftQueue = deque(maxlen=10000)
+    ifftQueue = deque(maxlen=10000)
 
     machineLearningPlottingQueues.append(fftQueue)
     machineLearningPlottingQueues.append(ifftQueue)

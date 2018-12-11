@@ -56,7 +56,7 @@ class Plot(QtGui.QMainWindow):
         self.otherplot6 = self.canvas.addPlot(title="Steps")
         self.h6 = self.otherplot6.plot(pen='y')
 
-        self.otherplot7 = self.canvas.addPlot(title="FFT")
+        self.otherplot7 = self.canvas.addPlot(title="FFT", labels={'left':"Mag", 'bottom': "Hz"})
         self.h7 = self.otherplot7.plot(pen='y')
 
 
@@ -102,6 +102,7 @@ class Plot(QtGui.QMainWindow):
 
         if self.fftQueue:
             freqs, mag = map(list, zip(*self.fftQueue))
+            self.h7.clear()
             self.h7.setData(freqs, mag)
 
         now = time.time()
