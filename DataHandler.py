@@ -49,6 +49,9 @@ class DataHandler(threading.Thread):
         self.tempStepsTime = deque()
 
         self.calcrotZsmall = deque(maxlen=self.SMALLERFRAME)
+        self.calcaccZsmall = deque(maxlen=self.SMALLERFRAME)
+        self.calcaccXYsmall = deque(maxlen=self.SMALLERFRAME)
+        self.calcrotXYsmall = deque(maxlen=self.SMALLERFRAME)
 
         for body in iter(self.queue.get, None):
             # print(' [x] received %r' % (body,))
@@ -101,6 +104,12 @@ class DataHandler(threading.Thread):
         for rotz in self.temprotZ:
             self.calcrotZsmall.append(rotz)
 
+        for accz in self.tempaccZ:
+            self.calcaccZsmall.append(accz)
+
+        for rotx, roty in zip(self.temprotX, self.temprotY):
+            self.calcrotXYsmall.append(math.sqrt(rotx * rotx + roty * roty))
+
         self.fillDeque(self.plottingDataQueue)
         self.fillQueue(self.machineLearningDataQueue)
 
@@ -137,6 +146,10 @@ class DataHandler(threading.Thread):
         tempZ = not len(self.temprotZ) == 0
         if tempZ:
             queue[9].put(np.trapz(self.calcrotZsmall))
+
+        tempRotZ = not len(self.temprotZ) == 0
+        if tempRotZ:
+            queue[13].put(np.trapz(self.calcrotXYsmall))
 
         for step,time in zip(self.tempSteps, self.tempStepsTime):
             queue[8].put((time,step))
@@ -176,6 +189,10 @@ class DataHandler(threading.Thread):
         tempZ = not len(self.temprotZ) == 0
         if tempZ:
             queue[9].append(np.trapz(self.calcrotZsmall))
+
+        tempRotZ = not len(self.temprotZ) == 0
+        if tempRotZ:
+            queue[13].append(np.trapz(self.calcrotXYsmall))
 
         for step,time in zip(self.tempSteps, self.tempStepsTime):
             queue[8].append((time,step))

@@ -35,6 +35,7 @@ def createDequeList():
 
     steps = deque(maxlen=FRAMESIZE)
     stepsTime = deque(maxlen=FRAMESIZE)
+    integAccZ = deque(maxlen=FRAMESIZE)
 
     queueList.append(accX)
     queueList.append(accY)
@@ -51,6 +52,7 @@ def createDequeList():
     queueList.append(accTime)
     queueList.append(rotTime)
     queueList.append(stepsTime)
+    queueList.append(integAccZ)
 
     return queueList
 
@@ -74,6 +76,7 @@ def createQueueList():
 
     steps = Queue()
     stepsTime = Queue()
+    integAccZ = Queue()
 
     queueList.append(accX)
     queueList.append(accY)
@@ -90,6 +93,7 @@ def createQueueList():
     queueList.append(accTime)
     queueList.append(rotTime)
     queueList.append(stepsTime)
+    queueList.append(integAccZ)
 
     return queueList
 
@@ -103,7 +107,7 @@ if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
 
-    FRAMESIZE = 500
+    FRAMESIZE = 2500
 
 
     plottingDataQueue = createDequeList()

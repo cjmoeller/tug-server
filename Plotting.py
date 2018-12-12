@@ -17,6 +17,7 @@ class Plot(QtGui.QMainWindow):
         self.rotX, self.rotY, self.rotZ = queueList[3:6]
         self.accXY, self.rotXY, self.steps, self.integRotZ = queueList[6:10]
         self.accTime, self.rotTime, self.stepsTime = queueList[10:13]
+        self.integRotXY = queueList[13]
 
 
         #### PlottingQueues
@@ -62,9 +63,9 @@ class Plot(QtGui.QMainWindow):
 
         ### Set Ranges #####################
 
-        self.otherplot.setYRange(-20, 20, padding=0)
-        self.otherplot3.setYRange(-20, 20, padding=0)
-        self.otherplot4.setYRange(-20, 20, padding=0)
+        # self.otherplot.setYRange(-20, 20, padding=0)
+        # self.otherplot3.setYRange(-20, 20, padding=0)
+        # self.otherplot4.setYRange(-20, 20, padding=0)
 
 
         self.otherplot7.setYRange(-5,110)
@@ -91,10 +92,10 @@ class Plot(QtGui.QMainWindow):
 
         if self.rotXY:
             rotXYTime, rotXY = map(list, zip(*self.rotXY))
-            self.h4.setData(rotXYTime, rotXY)
+            self.h4.setData(self.integRotXY)
 
             rotZTime, rotZ= map(list, zip(*self.accXY))
-            self.h5.setData(rotZTime, rotZ)
+            self.h5.setData(self.integRotZ)
 
         if self.steps:
             stepsTime, steps = map(list, zip(*self.steps))
