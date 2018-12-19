@@ -4,9 +4,20 @@ import numpy as np
 import time
 import struct
 import math
-
+import settings
 
 class Plot(QtGui.QMainWindow):
+
+    lastState = 0
+    def pushBtn(self):
+        if(settings.keyboardLabel != 0):
+            self.lastState = settings.keyboardLabel
+            settings.keyboardLabel = 0
+        else:
+            self.lastState = (self.lastState + 1) % 4
+            settings.keyboardLabel = self.lastState
+
+        self.btn.setText("Label: " + str(settings.keyboardLabel))
 
 
     def __init__(self, queueList, plottingQueues, parent=None):
@@ -37,7 +48,9 @@ class Plot(QtGui.QMainWindow):
         self.label = QtGui.QLabel()
         self.mainbox.layout().addWidget(self.label)
 
-
+        self.btn = QtGui.QPushButton('Label: 0')
+        self.btn.clicked.connect(lambda:self.pushBtn())
+        self.mainbox.layout().addWidget(self.btn)
 
         #  line plot
         self.otherplot = self.canvas.addPlot(title="Magnitude Acc XY-Plane")

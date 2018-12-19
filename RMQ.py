@@ -12,7 +12,7 @@ class RMQConnection(threading.Thread):
 
 
     def run(self):
-        self.URLparameters = pika.connection.URLParameters("amqp://sensors:sensors@localhost:5672")
+        self.URLparameters = pika.connection.URLParameters("amqp://sensors:sensors@192.168.178.25:5672")
         self.connection = pika.BlockingConnection(self.URLparameters)
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="sensorData", durable=True, exclusive=False, auto_delete=False)

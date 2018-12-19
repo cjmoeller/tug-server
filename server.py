@@ -9,6 +9,7 @@ from DataHandler import DataHandler
 from machinelearning.MachineLearning import ML
 import argparse
 import datetime
+import settings
 
 parser = argparse.ArgumentParser(description='Live Abschnittserkennung des TUG-Tests mit Hilfe von IMU-Daten und Neuronalen Netzen')
 parser.add_argument('--save', dest='save', action='store_true', help='Save received values to file', default=False)
@@ -103,11 +104,12 @@ if __name__ == '__main__':
     if args.save:
         file_name = '{0:%Y-%m-%d_%H-%M-%S}'.format(datetime.datetime.now())
         text_file = open('{}.csv'.format(file_name), "w+")
-        text_file.write("time;Sensor Type;v1;v2;v3\n")
+        text_file.write("time;Sensor Type;v1;v2;v3;Label\n")
 
     app = QtGui.QApplication(sys.argv)
 
     FRAMESIZE = 2500
+    settings.init()
 
 
     plottingDataQueue = createDequeList()

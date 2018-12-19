@@ -3,6 +3,7 @@ import threading
 import struct
 import math
 import numpy as np
+import settings
 from collections import deque
 
 class DataHandler(threading.Thread):
@@ -215,4 +216,5 @@ class DataHandler(threading.Thread):
         self.tempStepsTime.clear()
 
     def save_to_file(self, mes_time, mes_type, v1, v2, v3):
-        self.text_file.write('{};{};{};{};{}\n'.format(mes_time, mes_type, v1, v2, v3))
+        self.text_file.write('{};{};{};{};{};{}\n'.format(mes_time, mes_type, v1, v2, v3, settings.keyboardLabel))
+        self.text_file.flush()
