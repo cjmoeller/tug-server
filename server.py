@@ -130,13 +130,16 @@ if __name__ == '__main__':
     thisplot.show()
 
     dataHandler = DataHandler(rmqQueue, plottingDataQueue, machineLearningDataQueue, args, text_file)
+    dataHandler.setDaemon(True)
     dataHandler.start()
 
 
     machineLearning = ML(machineLearningDataQueue, machineLearningPlottingQueues, FRAMESIZE)
+    machineLearning.setDaemon(True)
     machineLearning.start()
 
     td = RMQConnection(rmqQueue)
+    td.setDaemon(True)
     td.start()
 
 
