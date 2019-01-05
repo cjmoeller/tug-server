@@ -70,4 +70,5 @@ fabric.properties
 
 __pycache__
 *.csv
+!LabeledData/*.csv
 .DS_Store
