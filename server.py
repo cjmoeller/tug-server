@@ -1,11 +1,11 @@
 
 import sys
-from RMQ import RMQConnection
+from classes.RMQ import RMQConnection
 from queue import Queue
-from pyqtgraph.Qt import QtCore, QtGui
-from Plotting import Plot
+from pyqtgraph.Qt import QtGui
+from classes.Plotting import Plot
 from collections import deque
-from DataHandler import DataHandler
+from classes.DataHandler import DataHandler
 from machinelearning.MachineLearning import ML
 import argparse
 import datetime
