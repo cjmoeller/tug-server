@@ -10,7 +10,7 @@ def createnewFile(file, path, LabelNmbr):
     filename =filename+"-Label-"+str(LabelNmbr)+'-'+str(fileNmbr)
 
 
-    if(os.path.isfile(newpath+'/'+filename+'.csv')): #Für den Fall, dass ein File bereits existiert, bzw. der Filename breits vergeben ist
+    if(os.path.isfile(os.path.join(newpath,filename)+'.csv')): #Für den Fall, dass ein File bereits existiert, bzw. der Filename breits vergeben ist
         return
 
 
@@ -20,14 +20,15 @@ def createnewFile(file, path, LabelNmbr):
     #Generiert neue Filenames, bis es kein File mit dem aktullen Namen gibt. (Zählt die Variable fileNmbr hoch)
     #
 
-    while(os.path.isfile(newpath+'/'+filename+'.csv')):
+    while(os.path.isfile(os.path.join(newpath,filename)+'.csv')):
         print('file name already exists')
         filename = filename[:-len(str(fileNmbr))]
         fileNmbr +=1
         filename = filename+str(fileNmbr) 
     '''
+
     print('Creating File for Label: '+str(LabelNmbr))
-    text_file = open(newpath+'/'+filename+'.csv', "w+")
+    text_file = open(os.path.join(newpath, filename)+'.csv', "w+")
     text_file.write("time;Sensor Type;v1;v2;v3;Label\n")
     
     return text_file
@@ -44,7 +45,7 @@ def exportData(dirPath,file, newpath):
         return
 
 
-    contents = pd.read_csv(dirPath+'/'+file,delimiter=';')
+    contents = pd.read_csv(os.path.join(dirPath,file),delimiter=';')
     df = pd.DataFrame(contents, columns = ['time','Sensor Type','v1','v2','v3','Label'])
     for row in df.iterrows():
 
@@ -62,16 +63,13 @@ def exportData(dirPath,file, newpath):
         elif(row[1]['Label'] == 3):
             fileLabel3.write('{};{};{};{};{};{}\n'.format(Time,SensorType,v1,v2,v3,Label))
 
-
-
-
 if __name__ == '__main__':
 
     root = tk.Tk()
     root.withdraw()
     currdir = os.getcwd()
     file_path = filedialog.askdirectory()
-    newpath = file_path+'/extractedData'
+    newpath = os.path.join(file_path,'extractedData')
     print(file_path)
     print('newpath: {}'.format(newpath))
 
