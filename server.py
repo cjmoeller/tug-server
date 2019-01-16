@@ -107,10 +107,9 @@ if __name__ == '__main__':
         text_file.write("time;Sensor Type;v1;v2;v3;Label\n")
 
     app = QtGui.QApplication(sys.argv)
-
-    FRAMESIZE = 2500
     settings.init()
 
+    FRAMESIZE = settings.FRAMESIZE
 
     plottingDataQueue = createDequeList()
     machineLearningDataQueue = createQueueList()

@@ -2,6 +2,10 @@ import os
 from tkinter import filedialog
 import tkinter as tk
 import pandas as pd
+import math
+import numpy as np
+import settings
+from queue import Queue
 
 
 
@@ -30,6 +34,36 @@ def cutFileToSize(FileContents, valsBefore, valsAfter):
     return dataFrameList
 
 
+def createFeatures(dataFrameList):
+
+
+    for dataframe in dataFrameList:
+        dataframe['magnitude'] = dataframe.apply(lambda row: math.sqrt(row.v1 * row.v1 + row.v2 * row.v2), axis=1)
+
+
+        rotZValues = []
+        for index, row in dataframe.iterrows():
+            if row['Sensor Type'] == 4:
+                rotZValues.append(row['v3'])
+
+        rotIntegValues = Queue()
+        for i in range(len(rotZValues)):
+            slice = rotZValues[max(0, i-settings.INTEGRALFRAMESIZE):min(i+1, len(rotZValues))]
+            rotIntegValues.put(np.trapz(slice))
+
+        for index, row in dataframe.iterrows():
+            if row['Sensor Type'] == 4:
+                dataframe.at[index,'rotZInteg'] = rotIntegValues.get()
+
+        dataframe.reset_index(inplace=True)
+
+        print(dataframe[['Sensor Type','v3','rotZInteg']])
+        print("QueueLen: ", rotIntegValues.qsize())
+        break
+
+
+
+
 if __name__ == '__main__':
 
     root = tk.Tk()
@@ -43,4 +77,6 @@ if __name__ == '__main__':
         if file.endswith('.csv'):
             FileContents.append(pd.read_csv(os.path.join(file_path,file),delimiter=';'))
 
-    print(cutFileToSize(FileContents, 10,10))
+
+    dataframelist = cutFileToSize(FileContents, 10,10)
+    createFeatures(dataframelist)
