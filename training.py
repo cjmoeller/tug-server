@@ -8,6 +8,9 @@ import pandas as pd
 def cutFileToSize(FileContents, valsBefore, valsAfter):
     '''
     Turns pandas Files into pandas Dataframes and cuts them to size
+    FileContents: Content of csv File
+    valsBefore: How many values you want to keep before the first '1' Label
+    valsAfter: How many Values you want to keep after the last '3' Label
     '''
     dataFrameList = []
     for file in FileContents:
