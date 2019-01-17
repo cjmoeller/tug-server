@@ -8,7 +8,9 @@ from collections import deque
 
 class DataHandler(threading.Thread):
 
-    SMALLERFRAME = settings.INTEGRALFRAMESIZE
+    SMALLERFRAMEZ = settings.INTEGRALZFRAMESIZE
+    SMALLERFRAMEXY = settings.INTEGRALXYFRAMESIZE
+
 
     def __init__(self, queue, plottingDataQueue, machineLearningDataQeue, args, text_file):
         threading.Thread.__init__(self)
@@ -49,10 +51,10 @@ class DataHandler(threading.Thread):
         self.tempSteps = deque()
         self.tempStepsTime = deque()
 
-        self.calcrotZsmall = deque(maxlen=self.SMALLERFRAME)
-        self.calcaccZsmall = deque(maxlen=self.SMALLERFRAME)
-        self.calcaccXYsmall = deque(maxlen=self.SMALLERFRAME)
-        self.calcrotXYsmall = deque(maxlen=self.SMALLERFRAME)
+        self.calcrotZsmall = deque(maxlen=self.SMALLERFRAMEZ)
+        self.calcaccZsmall = deque(maxlen=self.SMALLERFRAMEZ)
+        self.calcaccXYsmall = deque(maxlen=self.SMALLERFRAMEXY)
+        self.calcrotXYsmall = deque(maxlen=self.SMALLERFRAMEXY)
 
         for body in iter(self.queue.get, None):
             # print(' [x] received %r' % (body,))
