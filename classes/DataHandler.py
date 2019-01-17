@@ -8,7 +8,7 @@ from collections import deque
 
 class DataHandler(threading.Thread):
 
-    SMALLERFRAME = 100
+    SMALLERFRAME = settings.INTEGRALFRAMESIZE
 
     def __init__(self, queue, plottingDataQueue, machineLearningDataQeue, args, text_file):
         threading.Thread.__init__(self)

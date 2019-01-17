@@ -1,11 +1,11 @@
 
 import sys
-from RMQ import RMQConnection
+from classes.RMQ import RMQConnection
 from queue import Queue
-from pyqtgraph.Qt import QtCore, QtGui
-from Plotting import Plot
+from pyqtgraph.Qt import QtGui
+from classes.Plotting import Plot
 from collections import deque
-from DataHandler import DataHandler
+from classes.DataHandler import DataHandler
 from machinelearning.MachineLearning import ML
 import argparse
 import datetime
@@ -107,10 +107,9 @@ if __name__ == '__main__':
         text_file.write("time;Sensor Type;v1;v2;v3;Label\n")
 
     app = QtGui.QApplication(sys.argv)
-
-    FRAMESIZE = 2500
     settings.init()
 
+    FRAMESIZE = settings.FRAMESIZE
 
     plottingDataQueue = createDequeList()
     machineLearningDataQueue = createQueueList()
