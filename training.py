@@ -1,5 +1,6 @@
 import os
 import matplotlib
+from matplotlib import pyplot as plt
 matplotlib.use("TkAgg")
 from tkinter import filedialog
 import tkinter as tk
@@ -10,7 +11,19 @@ from numpy import array
 import settings
 from queue import Queue
 from collections import deque, Counter
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Reshape, GlobalAveragePooling1D, RepeatVector
+from keras.layers import Conv2D, MaxPooling2D, Conv1D, MaxPooling1D
+from keras.utils import np_utils
 
+
+
+FRAMESIZE = settings.FRAMESIZE
+STEPSIZE = settings.STEPSIZE
+NUM_SUBLABELS = settings.NUM_SUBLABELS
+NUM_SENSORS = settings.NUM_SENSORS
+NUM_CLASSES = settings.NUM_CLASSES
 
 
 
@@ -54,7 +67,7 @@ def createFeatures(dataFrameList):
 
         rotIntegValues = Queue()
         for i in range(len(rotZValues)):
-            slice = rotZValues[max(0, i-settings.INTEGRALFRAMESIZE):min(i+1, len(rotZValues))]
+            slice = rotZValues[max(0, i-settings.INTEGRALZFRAMESIZE):min(i+1, len(rotZValues))]
             rotIntegValues.put(np.trapz(slice))
 
         for index, row in dataframe.iterrows():
@@ -65,7 +78,7 @@ def createFeatures(dataFrameList):
 
         # print(dataframe[['Sensor Type','v3','rotZInteg']])
         # print("QueueLen: ", rotIntegValues.qsize())
-        break
+
 
 
 def create_frames_and_labels(df, framesize, stepsize, numlabels):
@@ -87,7 +100,7 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
     xyrot = deque(maxlen=framesize)
     accZ = deque(maxlen=framesize)
     integRotZ = deque(maxlen=framesize)
-    labelqueue = deque(maxlen=framesize*num_features)
+    labelqueue = deque(maxlen=framesize*2)
 
     listSensor = df['Sensor Type'].values
     listMagnitude = df['magnitude'].values
@@ -128,7 +141,7 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
             labelstepsize = int(len(labelqueue)/numlabels)
             label = []
             labelqueuelist = list(labelqueue)
-            for i in range(0, len(labelqueue)-labelstepsize, labelstepsize):
+            for i in range(0, len(labelqueuelist)-labelstepsize+1, labelstepsize):
                 sublabels = labelqueuelist[i:i+labelstepsize]
                 data = Counter(sublabels)
                 label.append(max(sublabels, key=data.get))
@@ -136,12 +149,82 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
             frames.append([list(xyacc), list(xyrot), list(accZ), list(integRotZ)])
             labels.append(label)
         else:
-            print(frames)
             break
 
-    framearray = array(frames)
-    print(framearray.shape)
 
+    framearray = array(frames)
+    framearray = np.swapaxes(framearray,1,2)
+
+    labelarray = array(labels)
+    # print(framearray)
+    # print(labelarray)
+    # print(labelarray.shape)
+
+
+    return framearray, labelarray
+
+
+def train_this_model(x_train, y_train):
+
+    ### Shuffle
+    idx = np.random.permutation(len(frames))
+    x_train, y_train = x_train[idx], y_train[idx]
+
+    callbacks_list = [
+        keras.callbacks.ModelCheckpoint(
+            filepath='best_model.{epoch:02d}-{val_loss:.2f}.h5',
+            monitor='val_loss', save_best_only=True),
+        keras.callbacks.EarlyStopping(monitor='acc', patience=4)
+    ]
+
+    model_m = Sequential()
+    model_m.add(Conv1D(100, 10, activation='relu', input_shape=(FRAMESIZE, NUM_SENSORS)))
+    model_m.add(Conv1D(100, 10, activation='relu'))
+    model_m.add(MaxPooling1D(3))
+    model_m.add(Conv1D(160, 10, activation='relu'))
+    model_m.add(Conv1D(160, 10, activation='relu'))
+    model_m.add(GlobalAveragePooling1D())
+    model_m.add(Dropout(0.5))
+    model_m.add(RepeatVector(NUM_SUBLABELS))
+    model_m.add(Dense(NUM_CLASSES, activation='softmax'))
+    print(model_m.summary())
+
+    model_m.compile(loss='categorical_crossentropy',
+                    optimizer='adam', metrics=['accuracy'])
+
+    # Hyper-parameters
+    BATCH_SIZE = 400
+    EPOCHS = 50
+
+    history = model_m.fit(x_train,
+                          y_train,
+                          batch_size=BATCH_SIZE,
+                          epochs=EPOCHS,
+                          callbacks=callbacks_list,
+                          validation_split=0.2,
+                          verbose=1)
+
+    # summarize history for accuracy and loss
+    plt.figure(figsize=(6, 4))
+    plt.plot(history.history['acc'], "g--", label="Accuracy of training data")
+    plt.plot(history.history['val_acc'], "g", label="Accuracy of validation data")
+    plt.plot(history.history['loss'], "r--", label="Loss of training data")
+    plt.plot(history.history['val_loss'], "r", label="Loss of validation data")
+    plt.title('Model Accuracy and Loss')
+    plt.ylabel('Accuracy and Loss')
+    plt.xlabel('Training Epoch')
+    plt.ylim(0)
+    plt.legend()
+    plt.show()
+
+
+
+def normalize(framearray):
+
+    for frame in framearray:
+        maxabs = abs(np.amax(np.absolute(frame), axis=0))
+
+        frame /= maxabs
 
 if __name__ == '__main__':
 
@@ -159,4 +242,25 @@ if __name__ == '__main__':
 
     dataframelist = cutFileToSize(FileContents, 10,10)
     createFeatures(dataframelist)
-    create_frames_and_labels(dataframelist[0], 80, 10, 10)
+
+    frames = []
+    labels = []
+
+    for dataframe in dataframelist:
+        framearray, labelarray = create_frames_and_labels(dataframe, FRAMESIZE, STEPSIZE, NUM_SUBLABELS)
+        normalize(framearray)
+        frames.append(framearray)
+        labels.append(labelarray)
+
+    frames = np.concatenate(frames)
+    labels = np.concatenate(labels)
+    print('Shape of training frames: ', frames.shape)
+    print("Shape of training labels: ", labels.shape)
+
+    y_train = np_utils.to_categorical(labels, 4)
+    print("New shape of training labels: ", y_train.shape)
+    print(labels[55])
+    print(y_train[55])
+
+
+    train_this_model(frames, y_train)

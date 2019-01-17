@@ -77,9 +77,8 @@ class Plot(QtGui.QMainWindow):
         ### Set Ranges #####################
 
         # self.otherplot.setYRange(-20, 20, padding=0)
-        # self.otherplot3.setYRange(-20, 20, padding=0)
-        # self.otherplot4.setYRange(-20, 20, padding=0)
-
+        self.otherplot5.setYRange(-200, 350, padding=0)
+        self.otherplot4.setYRange(-200, 350, padding=0)
 
         self.otherplot7.setYRange(-5,110)
 
