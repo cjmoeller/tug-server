@@ -61,18 +61,26 @@ def createFeatures(dataFrameList):
 
 
         rotZValues = []
+        magrotXYValues = []
         for index, row in dataframe.iterrows():
             if row['Sensor Type'] == 4:
                 rotZValues.append(row['v3'])
+                magrotXYValues.append(row['magnitude'])
 
         rotIntegValues = Queue()
         for i in range(len(rotZValues)):
-            slice = rotZValues[max(0, i-settings.INTEGRALZFRAMESIZE):min(i+1, len(rotZValues))]
-            rotIntegValues.put(np.trapz(slice))
+            sliceRotZ = rotZValues[max(0, i-settings.INTEGRALZFRAMESIZE):min(i+1, len(rotZValues))]
+            rotIntegValues.put(np.trapz(sliceRotZ))
+
+        rotXYIntegValues = Queue()
+        for i in range(len(magrotXYValues)):
+            sliceRotXY = magrotXYValues[max(0, i-settings.INTEGRALXYFRAMESIZE): min(i+1, len(magrotXYValues))]
+            rotXYIntegValues.put(np.trapz(sliceRotXY))
 
         for index, row in dataframe.iterrows():
             if row['Sensor Type'] == 4:
                 dataframe.at[index,'rotZInteg'] = rotIntegValues.get()
+                dataframe.at[index, 'rotXYInteg'] = rotXYIntegValues.get()
 
         dataframe.reset_index(inplace=True)
 
@@ -106,6 +114,7 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
     listMagnitude = df['magnitude'].values
     listv3 = df['v3'].values
     listrotZInteg = df['rotZInteg'].values
+    listrotXYInteg = df['rotXYInteg'].values
     listLabel = df['Label'].values
 
     counter = 0
@@ -128,7 +137,7 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
             elif sensortype == 4:
                 count4 += 1
                 c4 += 1
-                xyrot.append(listMagnitude[counter])
+                xyrot.append(listrotXYInteg[counter])
                 integRotZ.append(listrotZInteg[counter])
 
             if sensortype == 3 or sensortype == 4:
@@ -215,6 +224,7 @@ def train_this_model(x_train, y_train):
     plt.xlabel('Training Epoch')
     plt.ylim(0)
     plt.legend()
+    plt.grid(b=True, which='major', color='#666666', linestyle='-')
     plt.show()
 
 
