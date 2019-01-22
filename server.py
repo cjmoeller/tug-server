@@ -133,7 +133,7 @@ if __name__ == '__main__':
     dataHandler.start()
 
 
-    machineLearning = ML(machineLearningDataQueue, machineLearningPlottingQueues, FRAMESIZE)
+    machineLearning = ML(machineLearningDataQueue, machineLearningPlottingQueues)
     machineLearning.setDaemon(True)
     machineLearning.start()
 

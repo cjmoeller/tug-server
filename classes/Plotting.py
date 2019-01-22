@@ -1,9 +1,6 @@
 from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph as pg
-import numpy as np
 import time
-import struct
-import math
 import settings
 
 class Plot(QtGui.QMainWindow):
@@ -44,6 +41,11 @@ class Plot(QtGui.QMainWindow):
         self.canvas = pg.GraphicsLayoutWidget()
         pg.setConfigOptions(antialias=True)
         self.mainbox.layout().addWidget(self.canvas)
+
+        self.predictionLabel = QtGui.QLabel()
+        font = QtGui.QFont("Times", 20, QtGui.QFont.Bold)
+        self.predictionLabel.setFont(font)
+        self.mainbox.layout().addWidget(self.predictionLabel)
 
         self.label = QtGui.QLabel()
         self.mainbox.layout().addWidget(self.label)
@@ -117,6 +119,18 @@ class Plot(QtGui.QMainWindow):
             freqs, mag = map(list, zip(*self.fftQueue))
             self.h7.clear()
             self.h7.setData(freqs, mag)
+
+
+        if settings.LASTPREDICTION == 0:
+            self.predictionLabel.setText("laufen oder sitzen")
+        elif settings.LASTPREDICTION == 1:
+            self.predictionLabel.setText("Aufstehen")
+        elif settings.LASTPREDICTION == 2:
+            self.predictionLabel.setText("Umdrehen")
+        elif settings.LASTPREDICTION == 3:
+            self.predictionLabel.setText("Hinsetzen")
+
+
 
         now = time.time()
         dt = (now-self.lastupdate)

@@ -1,8 +1,10 @@
 import os
+os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+
 import matplotlib
 import time
-from matplotlib import pyplot as plt
 matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 from tkinter import filedialog
 import tkinter as tk
 import pandas as pd
@@ -12,6 +14,7 @@ from numpy import array
 import settings
 from queue import Queue
 from collections import deque, Counter
+
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Reshape, GlobalAveragePooling1D, RepeatVector
@@ -173,17 +176,7 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
 
     return framearray, labelarray
 
-def create_model():
-    model_m = Sequential()
-    model_m.add(Conv1D(100, 10, activation='relu', input_shape=(FRAMESIZE, NUM_SENSORS)))
-    model_m.add(Conv1D(100, 10, activation='relu'))
-    model_m.add(MaxPooling1D(3))
-    model_m.add(Conv1D(160, 11, activation='relu'))
-    model_m.add(Dropout(0.5))
-    model_m.add(Dense(200, activation='sigmoid'))
-    model_m.add(Dense(80, activation='sigmoid'))
-    model_m.add(Dense(NUM_CLASSES, activation='softmax'))
-    return model_m
+
 
 def train_this_model(x_train, y_train):
 
@@ -198,7 +191,7 @@ def train_this_model(x_train, y_train):
         keras.callbacks.EarlyStopping(monitor='acc', patience=4)
     ]
 
-    model_m = create_model()
+    model_m = settings.create_model()
 
     model_m.compile(loss='categorical_crossentropy',
                     optimizer='adam', metrics=['accuracy'])
@@ -261,7 +254,7 @@ if __name__ == '__main__':
         normalize(framearray)
         frames.append(framearray)
         labels.append(labelarray)
-    np.set_printoptions(threshold=np.nan)
+    # np.set_printoptions(threshold=np.nan)
 
     frames = np.concatenate(frames)
 
@@ -280,7 +273,7 @@ if __name__ == '__main__':
     ''' Tests
     test_frame = frames[0]
     test_frame = np.reshape(test_frame, (1,80,4))
-    model = create_model()
+    model = settings.create_model()
     model.load_weights('model.h5')
     for i in range(1,20):
         millis = int(round(time.time() * 1000))

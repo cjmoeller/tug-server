@@ -1,4 +1,5 @@
 import time, threading, pika
+import settings
 
 class RMQConnection(threading.Thread):
     def callback(self, ch, method, properties, body):
@@ -12,7 +13,7 @@ class RMQConnection(threading.Thread):
 
 
     def run(self):
-        self.URLparameters = pika.connection.URLParameters("amqp://sensors:sensors@localhost:5672")
+        self.URLparameters = pika.connection.URLParameters("amqp://sensors:sensors@{}:5672".format(settings.RABBITMQ))
         self.connection = pika.BlockingConnection(self.URLparameters)
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="sensorData", durable=True, exclusive=False, auto_delete=False)
