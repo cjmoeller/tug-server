@@ -1,4 +1,5 @@
 from pyqtgraph.Qt import QtCore, QtGui
+from PyQt5.QtCore import *
 import pyqtgraph as pg
 import time
 import settings
@@ -20,6 +21,10 @@ class Plot(QtGui.QMainWindow):
     def __init__(self, queueList, plottingQueues, parent=None):
         super(Plot, self).__init__(parent)
 
+
+        pg.setConfigOption('background', 'w')
+        pg.setConfigOption('foreground', 'k')
+
         #### Useable Vars
         self.accX, self.accY, self.accZ = queueList[0:3]
         self.rotX, self.rotY, self.rotZ = queueList[3:6]
@@ -35,6 +40,12 @@ class Plot(QtGui.QMainWindow):
         self.resize(1200, 900)
 
         self.mainbox = QtGui.QWidget()
+        self.mainbox.setAutoFillBackground(True)
+        # palette = self.mainbox.palette()
+        # palette.setColor(self.mainbox.backgroundRole(), pg.mkColor('w'))
+        # self.mainbox.setPalette(palette)
+
+
         self.setCentralWidget(self.mainbox)
         self.mainbox.setLayout(QtGui.QVBoxLayout())
 
@@ -43,6 +54,7 @@ class Plot(QtGui.QMainWindow):
         self.mainbox.layout().addWidget(self.canvas)
 
         self.predictionLabel = QtGui.QLabel()
+        self.predictionLabel.setAlignment(Qt.AlignCenter)
         font = QtGui.QFont("Times", 20, QtGui.QFont.Bold)
         self.predictionLabel.setFont(font)
         self.mainbox.layout().addWidget(self.predictionLabel)
@@ -56,24 +68,30 @@ class Plot(QtGui.QMainWindow):
 
         #  line plot
         self.otherplot = self.canvas.addPlot(title="Magnitude Acc XY-Plane")
-        self.h1 = self.otherplot.plot(pen='y')
+        self.h1 = self.otherplot.plot(pen='b')
         self.otherplot3 = self.canvas.addPlot(title="Acc Z-Axis")
-        self.h3 = self.otherplot3.plot(pen='y')
+        self.h3 = self.otherplot3.plot(pen='b')
 
         self.canvas.nextRow()
 
-        self.otherplot4 = self.canvas.addPlot(title="Magnitude Rot XY-Plane")
-        self.h4 = self.otherplot4.plot(pen='y')
+        self.otherplot4 = self.canvas.addPlot(title="Integrated Magnitude Rot XY-Plane")
+        self.h4 = self.otherplot4.plot(pen='b')
         self.otherplot5 = self.canvas.addPlot(title="Integrated Rot Z-Axis")
-        self.h5 = self.otherplot5.plot(pen='y')
+        self.h5 = self.otherplot5.plot(pen='b')
 
         self.canvas.nextRow()
 
-        self.otherplot6 = self.canvas.addPlot(title="Steps")
-        self.h6 = self.otherplot6.plot(pen='y')
+        self.otherplot6 = self.canvas.addPlot(title="Raw Acc")
+        self.otherplot6.addLegend()
+        self.h6x = self.otherplot6.plot(pen='b', name='X')
+        self.h6y = self.otherplot6.plot(pen='g', name='Y')
+        self.h6z = self.otherplot6.plot(pen='r', name='Z')
 
-        self.otherplot7 = self.canvas.addPlot(title="FFT", labels={'left':"Mag", 'bottom': "Hz"})
-        self.h7 = self.otherplot7.plot(pen='y')
+        self.otherplot7 = self.canvas.addPlot(title="Raw Rot")
+        self.otherplot7.addLegend()
+        self.h7x = self.otherplot7.plot(pen='b', name='X')
+        self.h7y = self.otherplot7.plot(pen='g', name='Y')
+        self.h7z = self.otherplot7.plot(pen='r', name='Z')
 
 
         ### Set Ranges #####################
@@ -81,8 +99,23 @@ class Plot(QtGui.QMainWindow):
         # self.otherplot.setYRange(-20, 20, padding=0)
         self.otherplot5.setYRange(-200, 350, padding=0)
         self.otherplot4.setYRange(-200, 350, padding=0)
+        # self.otherplot7.setYRange(-5,110)
 
-        self.otherplot7.setYRange(-5,110)
+        color = (0,119,239,120)
+
+
+        lr = pg.LinearRegionItem(values = [settings.PLOTTINGFRAMESIZE-settings.FRAMESIZE, settings.PLOTTINGFRAMESIZE])
+        lr.setBrush(color)
+        self.otherplot.addItem(lr)
+        lr = pg.LinearRegionItem([settings.PLOTTINGFRAMESIZE - settings.FRAMESIZE, settings.PLOTTINGFRAMESIZE])
+        lr.setBrush(color)
+        self.otherplot3.addItem(lr)
+        lr = pg.LinearRegionItem([settings.PLOTTINGFRAMESIZE - settings.FRAMESIZE, settings.PLOTTINGFRAMESIZE])
+        lr.setBrush(color)
+        self.otherplot4.addItem(lr)
+        lr = pg.LinearRegionItem([settings.PLOTTINGFRAMESIZE - settings.FRAMESIZE, settings.PLOTTINGFRAMESIZE])
+        lr.setBrush(color)
+        self.otherplot5.addItem(lr)
 
 
 
@@ -99,10 +132,10 @@ class Plot(QtGui.QMainWindow):
 
         if self.accXY:
             accXYtime, accXY = map(list, zip(*self.accXY))
-            self.h1.setData(accXYtime, accXY)
+            self.h1.setData(accXY)
 
             accZtime, accZ = map(list, zip(*self.accZ))
-            self.h3.setData(accZtime, accZ)
+            self.h3.setData(accZ)
 
         if self.rotXY:
             rotXYTime, rotXY = map(list, zip(*self.rotXY))
@@ -111,14 +144,22 @@ class Plot(QtGui.QMainWindow):
             rotZTime, rotZ= map(list, zip(*self.accXY))
             self.h5.setData(self.integRotZ)
 
-        if self.steps:
-            stepsTime, steps = map(list, zip(*self.steps))
-            self.h6.setData(stepsTime, steps)
+        if self.accX:
+            accXTime, accXVal = map(list, zip(*self.accX))
+            accYTime, accYVal = map(list, zip(*self.accY))
+            accZTime, accZVal = map(list, zip(*self.accZ))
+            self.h6x.setData(accXVal)
+            self.h6y.setData(accYVal)
+            self.h6z.setData(accZVal)
 
-        if self.fftQueue:
-            freqs, mag = map(list, zip(*self.fftQueue))
-            self.h7.clear()
-            self.h7.setData(freqs, mag)
+        if self.rotX:
+            rotXTime, rotXVal = map(list, zip(*self.rotX))
+            rotYTime, rotYVal = map(list, zip(*self.rotY))
+            rotZTime, rotZVal = map(list, zip(*self.rotZ))
+            self.h7x.setData(rotXVal)
+            self.h7y.setData(rotYVal)
+            self.h7z.setData(rotZVal)
+
 
 
         if settings.LASTPREDICTION == 0:

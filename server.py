@@ -17,7 +17,7 @@ args = parser.parse_args()
 
 text_file = None
 
-def createDequeList():
+def createDequeList(FRAMESIZE):
     queueList = []
 
     accX = deque(maxlen=FRAMESIZE)
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     FRAMESIZE = settings.FRAMESIZE
 
-    plottingDataQueue = createDequeList()
+    plottingDataQueue = createDequeList(settings.PLOTTINGFRAMESIZE)
     machineLearningDataQueue = createQueueList()
 
     rmqQueue = Queue()

@@ -8,7 +8,7 @@ from keras.layers import Conv2D, MaxPooling2D, Conv1D, MaxPooling1D
 from keras.utils import np_utils
 
 
-RABBITMQ = "localhost"
+RABBITMQ = "192.168.178.25"
 
 FRAMESIZE = 80
 STEPSIZE = 1
@@ -16,6 +16,7 @@ NUM_SUBLABELS = 10  # Should evenly devide the framesize!
 NUM_SENSORS = 4
 NUM_CLASSES = 4
 
+PLOTTINGFRAMESIZE = FRAMESIZE*5
 
 INTEGRALZFRAMESIZE = 40
 INTEGRALXYFRAMESIZE = 75
