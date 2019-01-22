@@ -1,5 +1,5 @@
 FRAMESIZE = 80
-STEPSIZE = 10
+STEPSIZE = 1
 NUM_SUBLABELS = 10  # Should evenly devide the framesize!
 NUM_SENSORS = 4
 NUM_CLASSES = 4

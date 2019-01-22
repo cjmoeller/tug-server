@@ -1,5 +1,6 @@
 import os
 import matplotlib
+import time
 from matplotlib import pyplot as plt
 matplotlib.use("TkAgg")
 from tkinter import filedialog
@@ -172,6 +173,17 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
 
     return framearray, labelarray
 
+def create_model():
+    model_m = Sequential()
+    model_m.add(Conv1D(100, 10, activation='relu', input_shape=(FRAMESIZE, NUM_SENSORS)))
+    model_m.add(Conv1D(100, 10, activation='relu'))
+    model_m.add(MaxPooling1D(3))
+    model_m.add(Conv1D(160, 11, activation='relu'))
+    model_m.add(Dropout(0.5))
+    model_m.add(Dense(200, activation='sigmoid'))
+    model_m.add(Dense(80, activation='sigmoid'))
+    model_m.add(Dense(NUM_CLASSES, activation='softmax'))
+    return model_m
 
 def train_this_model(x_train, y_train):
 
@@ -186,17 +198,7 @@ def train_this_model(x_train, y_train):
         keras.callbacks.EarlyStopping(monitor='acc', patience=4)
     ]
 
-    model_m = Sequential()
-    model_m.add(Conv1D(100, 10, activation='relu', input_shape=(FRAMESIZE, NUM_SENSORS)))
-    model_m.add(Conv1D(100, 10, activation='relu'))
-    model_m.add(MaxPooling1D(3))
-    model_m.add(Conv1D(160, 10, activation='relu'))
-    model_m.add(Conv1D(160, 10, activation='relu'))
-    model_m.add(GlobalAveragePooling1D())
-    model_m.add(Dropout(0.5))
-    model_m.add(RepeatVector(NUM_SUBLABELS))
-    model_m.add(Dense(NUM_CLASSES, activation='softmax'))
-    print(model_m.summary())
+    model_m = create_model()
 
     model_m.compile(loss='categorical_crossentropy',
                     optimizer='adam', metrics=['accuracy'])
@@ -226,8 +228,6 @@ def train_this_model(x_train, y_train):
     plt.legend()
     plt.grid(b=True, which='major', color='#666666', linestyle='-')
     plt.show()
-
-
 
 def normalize(framearray):
 
@@ -261,8 +261,10 @@ if __name__ == '__main__':
         normalize(framearray)
         frames.append(framearray)
         labels.append(labelarray)
+    np.set_printoptions(threshold=np.nan)
 
     frames = np.concatenate(frames)
+
     labels = np.concatenate(labels)
     print('Shape of training frames: ', frames.shape)
     print("Shape of training labels: ", labels.shape)
@@ -274,3 +276,15 @@ if __name__ == '__main__':
 
 
     train_this_model(frames, y_train)
+
+    ''' Tests
+    test_frame = frames[0]
+    test_frame = np.reshape(test_frame, (1,80,4))
+    model = create_model()
+    model.load_weights('model.h5')
+    for i in range(1,20):
+        millis = int(round(time.time() * 1000))
+        prediction = model.predict_classes(test_frame)
+        delta = millis = int(round(time.time() * 1000)) - millis
+        print(delta)
+    '''
