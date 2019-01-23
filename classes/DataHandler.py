@@ -105,7 +105,7 @@ class DataHandler(threading.Thread):
 
     def tuneValues(self):
         for rotz in self.temprotZ:
-            self.calcrotZsmall.append(rotz)
+            self.calcrotZsmall.append(abs(rotz))
 
         for accz in self.tempaccZ:
             self.calcaccZsmall.append(accz)

@@ -3,6 +3,7 @@ from PyQt5.QtCore import *
 import pyqtgraph as pg
 import time
 import settings
+from collections import Counter
 
 class Plot(QtGui.QMainWindow):
 
@@ -160,16 +161,21 @@ class Plot(QtGui.QMainWindow):
             self.h7y.setData(rotYVal)
             self.h7z.setData(rotZVal)
 
+        if len(settings.LASTPREDICTION) > 0:
+            data = Counter(settings.LASTPREDICTION)
+            prediction = (max(settings.LASTPREDICTION, key=data.get))
 
 
-        if settings.LASTPREDICTION == 0:
-            self.predictionLabel.setText("laufen oder sitzen")
-        elif settings.LASTPREDICTION == 1:
-            self.predictionLabel.setText("Aufstehen")
-        elif settings.LASTPREDICTION == 2:
-            self.predictionLabel.setText("Umdrehen")
-        elif settings.LASTPREDICTION == 3:
-            self.predictionLabel.setText("Hinsetzen")
+            if prediction == 0:
+                self.predictionLabel.setText("Laufen")
+            elif prediction == 1:
+                self.predictionLabel.setText("Aufstehen")
+            elif prediction == 2:
+                self.predictionLabel.setText("Umdrehen")
+            elif prediction == 3:
+                self.predictionLabel.setText("Hinsetzen")
+            elif prediction == 4:
+                self.predictionLabel.setText("Sitzen")
 
 
 

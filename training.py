@@ -15,6 +15,9 @@ import settings
 from queue import Queue
 from collections import deque, Counter
 
+from sklearn import tree
+from joblib import dump
+
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Reshape, GlobalAveragePooling1D, RepeatVector
@@ -45,6 +48,11 @@ def cutFileToSize(FileContents, valsBefore, valsAfter):
         labelList = df['Label'].tolist()
         start = labelList.index(1)
         end = len(labelList) - 1 - labelList[::-1].index(3)
+
+        for index, row in df.iterrows():
+            if index < start or index > end:
+                df.at[index,'Label'] = 4;
+
        
         if (start -valsBefore >= 0) and (end + valsAfter < len(labelList)):
             start = start -valsBefore
@@ -142,7 +150,7 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
                 count4 += 1
                 c4 += 1
                 xyrot.append(listrotXYInteg[counter])
-                integRotZ.append(listrotZInteg[counter])
+                integRotZ.append(abs(listrotZInteg[counter]))
 
             if sensortype == 3 or sensortype == 4:
                 labelqueue.append(listLabel[counter])
@@ -200,34 +208,45 @@ def train_this_model(x_train, y_train):
     BATCH_SIZE = 400
     EPOCHS = 50
 
-    history = model_m.fit(x_train,
-                          y_train,
-                          batch_size=BATCH_SIZE,
-                          epochs=EPOCHS,
-                          callbacks=callbacks_list,
-                          validation_split=0.2,
-                          verbose=1)
+    # history = model_m.fit(x_train,
+    #                       y_train,
+    #                       batch_size=BATCH_SIZE,
+    #                       epochs=EPOCHS,
+    #                       callbacks=callbacks_list,
+    #                       validation_split=0.2,
+    #                       verbose=1)
 
-    # summarize history for accuracy and loss
-    plt.figure(figsize=(6, 4))
-    plt.plot(history.history['acc'], "g--", label="Accuracy of training data")
-    plt.plot(history.history['val_acc'], "g", label="Accuracy of validation data")
-    plt.plot(history.history['loss'], "r--", label="Loss of training data")
-    plt.plot(history.history['val_loss'], "r", label="Loss of validation data")
-    plt.title('Model Accuracy and Loss')
-    plt.ylabel('Accuracy and Loss')
-    plt.xlabel('Training Epoch')
-    plt.ylim(0)
-    plt.legend()
-    plt.grid(b=True, which='major', color='#666666', linestyle='-')
-    plt.show()
+
+    print(x_train.shape)
+    print(y_train.shape)
+    clf = tree.DecisionTreeClassifier()
+    clf = clf.fit(x_train, y_train)
+    dump(clf, 'tree.joblib')
+
+
+    # # summarize history for accuracy and loss
+    # plt.figure(figsize=(6, 4))
+    # plt.plot(history.history['acc'], "g--", label="Accuracy of training data")
+    # plt.plot(history.history['val_acc'], "g", label="Accuracy of validation data")
+    # plt.plot(history.history['loss'], "r--", label="Loss of training data")
+    # plt.plot(history.history['val_loss'], "r", label="Loss of validation data")
+    # plt.title('Model Accuracy and Loss')
+    # plt.ylabel('Accuracy and Loss')
+    # plt.xlabel('Training Epoch')
+    # plt.ylim(0)
+    # plt.legend()
+    # plt.grid(b=True, which='major', color='#666666', linestyle='-')
+    # plt.show()
 
 def normalize(framearray):
 
     for frame in framearray:
         maxabs = abs(np.amax(np.absolute(frame), axis=0))
+        frame /= settings.DIVISIOR
+        # print(frame)
+        # frame = min(frame, 1)
+        # frame = max(frame, -1)
 
-        frame /= maxabs
 
 if __name__ == '__main__':
 
@@ -243,7 +262,7 @@ if __name__ == '__main__':
             FileContents.append(pd.read_csv(os.path.join(file_path,file),delimiter=';'))
 
 
-    dataframelist = cutFileToSize(FileContents, 10,10)
+    dataframelist = cutFileToSize(FileContents, 100,10)
     createFeatures(dataframelist)
 
     frames = []
@@ -262,7 +281,9 @@ if __name__ == '__main__':
     print('Shape of training frames: ', frames.shape)
     print("Shape of training labels: ", labels.shape)
 
-    y_train = np_utils.to_categorical(labels, 4)
+    # y_train = np_utils.to_categorical(labels, settings.NUM_CLASSES)
+    frames = np.reshape(frames, (15912, 320))
+    y_train = labels
     print("New shape of training labels: ", y_train.shape)
     print(labels[55])
     print(y_train[55])

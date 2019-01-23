@@ -1,6 +1,7 @@
 import settings
 import threading
 from collections import deque
+from joblib import load
 
 import numpy as np
 # from numpy.fft import rfft, fftshift, irfft, ifftshift, fft, ifft
@@ -35,42 +36,50 @@ class ML(threading.Thread):
         self.model = settings.create_model()
         self.model.load_weights(settings.MODEL)
 
+        self.tree = load('tree.joblib')
+
 
 
     def run(self):
+        acc = False
+        rot = False
         while True:
-            newVal = False
             if not self.accXY.empty():
                 accXYVal = self.accXY.get()
                 self.accXYdeq.append(accXYVal[1])
-                newVal = True
+                acc = True
             if not self.accZ.empty():
                 accZVal = self.accZ.get()
                 self.accZdeq.append(accZVal[1])
                 newVal = True
+                acc = True
             if not self.integRotXY.empty():
                 rotXYIntegVal = self.integRotXY.get()
                 self.rotXYIntegdeq.append(rotXYIntegVal)
-                newVal = True
+                rot = True
             if not self.integRotZ.empty():
                 rotZIntegVal = self.integRotZ.get()
                 self.rotZIntegdeq.append(rotZIntegVal)
-                newVal = True
+                rot = True
 
-            if newVal and len(self.accXYdeq) >= settings.FRAMESIZE and len(self.rotXYIntegdeq) >= settings.FRAMESIZE:
+            if acc and rot and len(self.accXYdeq) >= settings.FRAMESIZE and len(self.rotXYIntegdeq) >= settings.FRAMESIZE:
 
                 actualFrame = np.array([list(self.accXYdeq), list(self.rotXYIntegdeq), list(self.accZdeq), list(self.rotZIntegdeq)])
                 actualFrame = np.swapaxes(actualFrame, 0, 1)
-                absolute = np.absolute(actualFrame)
-                amax = np.amax(absolute, axis=0)
-                maxabs = abs(amax)
-                actualFrame /= maxabs
+                maxabs = abs(np.amax(np.absolute(actualFrame), axis=0))
+                actualFrame /= settings.DIVISIOR
 
-                actualFrame = np.reshape(actualFrame, (1, settings.FRAMESIZE, settings.NUM_SENSORS))
+                # actualFrame = np.reshape(actualFrame, (1, settings.FRAMESIZE, settings.NUM_SENSORS))
 
-                prediction = self.model.predict_classes(actualFrame)
+                actualFrame = actualFrame = np.reshape(actualFrame, (1, 320))
+                # prediction = self.model.predict_classes(actualFrame)
+
+                prediction = self.tree.predict(actualFrame)
+
                 print(prediction)
-                settings.LASTPREDICTION = prediction[0][-1]
+                settings.LASTPREDICTION.append(prediction[0][-2])
+                rot = False
+                acc = False
 
 
 
