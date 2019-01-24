@@ -1,9 +1,10 @@
 import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
 
 from collections import deque
 
 import keras
+import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Reshape, GlobalAveragePooling1D, RepeatVector
 from keras.layers import Conv2D, MaxPooling2D, Conv1D, MaxPooling1D
@@ -23,25 +24,26 @@ PLOTTINGFRAMESIZE = FRAMESIZE*5
 INTEGRALZFRAMESIZE = 40
 INTEGRALXYFRAMESIZE = 75
 
-MODEL = "best_model.50-0.17.h5"
+MODEL = "best_model.46-0.32.h5"
 
-LASTPREDICTION = deque(maxlen=10)
+LASTPREDICTION = deque(maxlen=15)
 
 DIVISIOR = (24,200,20,200)
 
 
 def create_model():
     model_m = Sequential()
-    model_m.add(Conv1D(100, 10, activation='relu', input_shape=(FRAMESIZE, NUM_SENSORS)))
-    model_m.add(Conv1D(100, 10, activation='relu'))
+    model_m.add(Conv1D(10, 10, activation='relu', input_shape=(FRAMESIZE, NUM_SENSORS)))
+    model_m.add(Conv1D(50, 10, activation='relu'))
     model_m.add(MaxPooling1D(3))
-    model_m.add(Conv1D(160, 11, activation='relu'))
-    model_m.add(Dropout(0.5))
-    model_m.add(Dense(200, activation='sigmoid'))
+    model_m.add(Conv1D(100, 11, activation='relu'))
+    model_m.add(Dropout(0.3))
     model_m.add(Dense(80, activation='sigmoid'))
+    model_m.add(Dense(40, activation='sigmoid'))
     model_m.add(Dense(NUM_CLASSES, activation='softmax'))
 
     print(model_m.summary())
+
     return model_m
 
 

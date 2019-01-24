@@ -1,5 +1,5 @@
 import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
 
 import matplotlib
 import time
@@ -15,7 +15,7 @@ import settings
 from queue import Queue
 from collections import deque, Counter
 
-from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
 
 import keras
@@ -199,32 +199,32 @@ def train_this_model(x_train, y_train):
         keras.callbacks.EarlyStopping(monitor='acc', patience=4)
     ]
 
-    model_m = settings.create_model()
+    # model_m = settings.create_model()
 
-    model_m.compile(loss='categorical_crossentropy',
-                    optimizer='adam', metrics=['accuracy'])
+    # model_m.compile(loss='categorical_crossentropy',
+    #                 optimizer='adam', metrics=['accuracy'])
 
     # Hyper-parameters
     BATCH_SIZE = 400
     EPOCHS = 50
 
-    # history = model_m.fit(x_train,
-    #                       y_train,
-    #                       batch_size=BATCH_SIZE,
-    #                       epochs=EPOCHS,
-    #                       callbacks=callbacks_list,
-    #                       validation_split=0.2,
-    #                       verbose=1)
+    #history = model_m.fit(x_train,
+                          # y_train,
+                          # batch_size=BATCH_SIZE,
+                          # epochs=EPOCHS,
+                          # callbacks=callbacks_list,
+                          # validation_split=0.2,
+                          # verbose=1)
 
 
     print(x_train.shape)
     print(y_train.shape)
-    clf = tree.DecisionTreeClassifier()
+    clf = RandomForestClassifier(n_estimators=15, max_depth=4, random_state=0)
     clf = clf.fit(x_train, y_train)
     dump(clf, 'tree.joblib')
 
 
-    # # summarize history for accuracy and loss
+    # summarize history for accuracy and loss
     # plt.figure(figsize=(6, 4))
     # plt.plot(history.history['acc'], "g--", label="Accuracy of training data")
     # plt.plot(history.history['val_acc'], "g", label="Accuracy of validation data")
@@ -281,8 +281,8 @@ if __name__ == '__main__':
     print('Shape of training frames: ', frames.shape)
     print("Shape of training labels: ", labels.shape)
 
-    # y_train = np_utils.to_categorical(labels, settings.NUM_CLASSES)
-    frames = np.reshape(frames, (15912, 320))
+    #y_train = np_utils.to_categorical(labels, settings.NUM_CLASSES)
+    frames = np.reshape(frames, (23687, 320))
     y_train = labels
     print("New shape of training labels: ", y_train.shape)
     print(labels[55])

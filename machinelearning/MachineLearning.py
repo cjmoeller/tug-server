@@ -1,6 +1,7 @@
 import settings
 import threading
 from collections import deque
+import tensorflow as tf
 from joblib import load
 
 import numpy as np
@@ -33,8 +34,9 @@ class ML(threading.Thread):
         self.rotZIntegdeq = deque(maxlen=self.FRAMESIZE)
 
 
-        self.model = settings.create_model()
-        self.model.load_weights(settings.MODEL)
+        #self.model = settings.create_model()
+       # self.model.load_weights(settings.MODEL)
+       # self.model._make_predict_function()
 
         self.tree = load('tree.joblib')
 
@@ -69,10 +71,10 @@ class ML(threading.Thread):
                 maxabs = abs(np.amax(np.absolute(actualFrame), axis=0))
                 actualFrame /= settings.DIVISIOR
 
-                # actualFrame = np.reshape(actualFrame, (1, settings.FRAMESIZE, settings.NUM_SENSORS))
+                #actualFrame = np.reshape(actualFrame, (1, settings.FRAMESIZE, settings.NUM_SENSORS))
 
-                actualFrame = actualFrame = np.reshape(actualFrame, (1, 320))
-                # prediction = self.model.predict_classes(actualFrame)
+                actualFrame = np.reshape(actualFrame, (1, 320))
+                #prediction = self.model.predict_classes(actualFrame)
 
                 prediction = self.tree.predict(actualFrame)
 
