@@ -282,7 +282,7 @@ if __name__ == '__main__':
     print("Shape of training labels: ", labels.shape)
 
     #y_train = np_utils.to_categorical(labels, settings.NUM_CLASSES)
-    frames = np.reshape(frames, (23687, 320))
+    frames = np.reshape(frames, (37829, 320))
     y_train = labels
     print("New shape of training labels: ", y_train.shape)
     print(labels[55])

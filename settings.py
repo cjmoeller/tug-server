@@ -26,7 +26,7 @@ INTEGRALXYFRAMESIZE = 75
 
 MODEL = "best_model.46-0.32.h5"
 
-LASTPREDICTION = deque(maxlen=15)
+LASTPREDICTION = deque(maxlen=5)
 
 DIVISIOR = (24,200,20,200)
 
