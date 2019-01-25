@@ -30,6 +30,8 @@ LASTPREDICTION = deque(maxlen=5)
 
 DIVISIOR = (24,200,20,200)
 
+LABELS = ['Laufen', 'Aufstehen', 'Drehen', 'Hinsetzen', 'Sitzen']
+
 
 def create_model():
     model_m = Sequential()

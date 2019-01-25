@@ -15,6 +15,11 @@ import settings
 from queue import Queue
 from collections import deque, Counter
 
+from sklearn import metrics
+from sklearn.metrics import classification_report
+import seaborn as sns
+
+
 from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
 
@@ -185,11 +190,29 @@ def create_frames_and_labels(df, framesize, stepsize, numlabels):
     return framearray, labelarray
 
 
+def show_confusion_matrix(validations, predictions):
+
+    matrix = metrics.confusion_matrix(validations[:,-1], predictions[:,-1])
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(matrix,
+                cmap="coolwarm",
+                linecolor='white',
+                linewidths=1,
+                xticklabels=settings.LABELS,
+                yticklabels=settings.LABELS,
+                annot=True,
+                fmt="d")
+    plt.title("Confusion Matrix")
+    plt.ylabel("True Label")
+    plt.xlabel("Predicted Label")
+    plt.show()
+
+model_m = RandomForestClassifier(n_estimators=15, max_depth=4, random_state=0, verbose=True)
 
 def train_this_model(x_train, y_train):
 
     ### Shuffle
-    idx = np.random.permutation(len(frames))
+    idx = np.random.permutation(len(x_train))
     x_train, y_train = x_train[idx], y_train[idx]
 
     callbacks_list = [
@@ -219,8 +242,7 @@ def train_this_model(x_train, y_train):
 
     print(x_train.shape)
     print(y_train.shape)
-    clf = RandomForestClassifier(n_estimators=15, max_depth=4, random_state=0)
-    clf = clf.fit(x_train, y_train)
+    clf = model_m.fit(x_train, y_train)
     dump(clf, 'tree.joblib')
 
 
@@ -282,14 +304,34 @@ if __name__ == '__main__':
     print("Shape of training labels: ", labels.shape)
 
     #y_train = np_utils.to_categorical(labels, settings.NUM_CLASSES)
-    frames = np.reshape(frames, (37829, 320))
+
+    frames = np.reshape(frames, (len(frames), 320))
+
     y_train = labels
     print("New shape of training labels: ", y_train.shape)
     print(labels[55])
     print(y_train[55])
 
+    ### Shuffle
+    idx = np.random.permutation(len(frames))
+    x_train, y_train = frames[idx], y_train[idx]
 
-    train_this_model(frames, y_train)
+    x_test = x_train[-int(len(x_train) / 10):]
+    y_test = y_train[-int(len(y_train) / 10):]
+
+    x_train = x_train[:-int(len(x_train) / 10)]
+    y_train = y_train[:-int(len(y_train) / 10)]
+
+    train_this_model(x_train, y_train)
+
+    print("\n--- Confusion matrix for test data ---\n")
+
+    y_pred_test = model_m.predict(x_test)
+    # Take the class with the highest probability from the test predictions
+    # max_y_pred_test = np.argmax(y_pred_test, axis=1)
+    # max_y_test = np.argmax(y_test, axis=1)
+
+    show_confusion_matrix(y_test, y_pred_test)
 
     ''' Tests
     test_frame = frames[0]
