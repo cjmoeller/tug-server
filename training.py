@@ -207,7 +207,7 @@ def show_confusion_matrix(validations, predictions):
     plt.xlabel("Predicted Label")
     plt.show()
 
-model_m = RandomForestClassifier(n_estimators=15, max_depth=4, random_state=0, verbose=True)
+model_m = RandomForestClassifier(n_estimators=15, max_depth=4, random_state=0)
 
 def train_this_model(x_train, y_train):
 

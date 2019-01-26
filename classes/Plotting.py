@@ -11,9 +11,9 @@ class Plot(QtGui.QMainWindow):
     def pushBtn(self):
         if(settings.keyboardLabel != 0):
             self.lastState = settings.keyboardLabel
-            settings.keyboardLabel = 0
+            settings.keyboardLabel = 4
         else:
-            self.lastState = (self.lastState + 1) % 4
+            self.lastState = (self.lastState + 1) % 5
             settings.keyboardLabel = self.lastState
 
         self.btn.setText("Label: " + str(settings.keyboardLabel))

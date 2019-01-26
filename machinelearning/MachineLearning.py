@@ -67,7 +67,7 @@ class ML(threading.Thread):
         predicted_time = 0
         test_running = False
         for i in range(0, len(test_results)):
-            if (test_results[i] == last_state):
+            if test_results[i] == last_state:
                 current_count += 1
             else:
                 print("Activity " + str(last_state) + " for " + str(current_count * time_period) + "s")
@@ -80,6 +80,7 @@ class ML(threading.Thread):
                 last_state = test_results[i]
                 current_count = 0
         print("Predicted time: " + str(predicted_time) + "s")
+        self.predictedData.clear()
 
     def run(self):
         acc = False
