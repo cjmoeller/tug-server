@@ -55,6 +55,7 @@ class ML(threading.Thread):
         endingTime = int(round(time.time() * 1000))
         print('test finished!')
         test_results = []
+        print(self.predictedData)
         for i in range(0, len(self.predictedData)):
             votes = self.predictedData[i]
             result = np.argmax(np.bincount(votes))
@@ -66,7 +67,7 @@ class ML(threading.Thread):
         print("========== TEST SUMMARY ===========")
         predicted_time = 0
         test_running = False
-        for i in range(0, len(test_results)):
+        for i in range(1, len(test_results)):
             if test_results[i] == last_state:
                 current_count += 1
             else:
@@ -80,7 +81,9 @@ class ML(threading.Thread):
                 last_state = test_results[i]
                 current_count = 0
         print("Predicted time: " + str(predicted_time) + "s")
-        self.predictedData.clear()
+        self.predictedData[:] = []
+        self.numPredictions = 0
+        self.testRunning = False
 
     def run(self):
         acc = False
