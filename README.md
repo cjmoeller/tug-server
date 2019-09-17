@@ -5,4 +5,4 @@ This implementation uses machine learning for the classification of the differen
 
 A short overview (in german) of the project is provided in the [overview.pdf](/overview.pdf).
 
-Contributors: @hwiards, @cjmoeller, Christian Steger
+Contributors: @hwiards, @cjmoeller, @RollingRhino
